@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JARVIS // STARK INDUSTRIES</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+<!-- BOOT OVERLAY -->
+<div id="boot-overlay">
+  <div class="boot-inner">
+    <div class="boot-arc">
+      <div class="arc-ring r1"></div>
+      <div class="arc-ring r2"></div>
+      <div class="arc-ring r3"></div>
+      <div class="arc-core"></div>
+    </div>
+    <div class="boot-title">JARVIS</div>
+    <div class="boot-sub">JUST A RATHER VERY INTELLIGENT SYSTEM</div>
+    <div id="boot-log"></div>
+    <div class="boot-bar-wrap"><div id="boot-bar"></div></div>
+  </div>
+</div>
+
+<!-- PARTICLE CANVAS -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- NAVIGATION -->
+<nav id="main-nav">
+  <div class="nav-logo">
+    <div class="logo-reactor"></div>
+    <span class="logo-text">STARK INDUSTRIES</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#home" class="nav-link active" data-section="home">HOME</a></li>
+    <li><a href="#system" class="nav-link" data-section="system">SYSTEM</a></li>
+    <li><a href="#interface" class="nav-link" data-section="interface">INTERFACE</a></li>
+    <li><a href="#about" class="nav-link" data-section="about">ABOUT</a></li>
+  </ul>
+  <div class="nav-status">
+    <span class="status-dot"></span>
+    <span class="status-text">ONLINE</span>
+  </div>
+</nav>
+
+<!-- HOME SECTION -->
+<section id="home" class="section active">
+  <div class="scan-line"></div>
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+
+  <div class="hud-center">
+    <div class="hud-ring-system">
+      <svg class="ring-svg" viewBox="0 0 500 500">
+        <circle class="ring-dash ring-outer" cx="250" cy="250" r="230" />
+        <circle class="ring-solid ring-mid" cx="250" cy="250" r="185" />
+        <circle class="ring-arc" cx="250" cy="250" r="160" />
+        <circle class="ring-dash ring-inner" cx="250" cy="250" r="130" />
+        <line class="crosshair-h" x1="20" y1="250" x2="480" y2="250"/>
+        <line class="crosshair-v" x1="250" y1="20" x2="250" y2="480"/>
+        <line class="diag-line" x1="88" y1="88" x2="145" y2="145"/>
+        <line class="diag-line" x1="412" y1="88" x2="355" y2="145"/>
+        <line class="diag-line" x1="88" y1="412" x2="145" y2="355"/>
+        <line class="diag-line" x1="412" y1="412" x2="355" y2="355"/>
+        <text class="hud-label" x="250" y="14" text-anchor="middle">N</text>
+        <text class="hud-label" x="250" y="493" text-anchor="middle">S</text>
+        <text class="hud-label" x="8" y="254" text-anchor="middle">W</text>
+        <text class="hud-label" x="492" y="254" text-anchor="middle">E</text>
+        <text class="hud-label-sm" x="250" y="32" text-anchor="middle">000°</text>
+        <text class="hud-label-sm" x="250" y="476" text-anchor="middle">180°</text>
+        <text class="hud-label-sm" x="28" y="254" text-anchor="middle">270°</text>
+        <text class="hud-label-sm" x="472" y="254" text-anchor="middle">090°</text>
+      </svg>
+    </div>
+
+    <div class="arc-reactor-hud">
+      <div class="arc-reactor-outer"></div>
+      <div class="arc-reactor-mid"></div>
+      <div class="arc-reactor-inner">
+        <div class="reactor-core"></div>
+        <div class="reactor-glow"></div>
+      </div>
+      <div class="reactor-spokes">
+        <div class="spoke s1"></div>
+        <div class="spoke s2"></div>
+        <div class="spoke s3"></div>
+      </div>
+    </div>
+
+    <div class="hud-panel hp-top-left">
+      <div class="hp-label">ARC REACTOR</div>
+      <div class="hp-value" id="hp-arc">100.0%</div>
+      <div class="hp-bar"><div class="hp-fill" id="hp-arc-bar" style="width:100%"></div></div>
+    </div>
+    <div class="hud-panel hp-top-right">
+      <div class="hp-label">SUIT INTEGRITY</div>
+      <div class="hp-value" id="hp-suit">98.4%</div>
+      <div class="hp-bar"><div class="hp-fill fill-green" id="hp-suit-bar" style="width:98%"></div></div>
+    </div>
+    <div class="hud-panel hp-bot-left">
+      <div class="hp-label">ALTITUDE</div>
+      <div class="hp-value" id="hp-alt">3,200 FT</div>
+    </div>
+    <div class="hud-panel hp-bot-right">
+      <div class="hp-label">VELOCITY</div>
+      <div class="hp-value" id="hp-vel">842 MPH</div>
+    </div>
+
+    <div class="target-reticle" id="target-reticle">
+      <div class="reticle-corner rc-tl"></div>
+      <div class="reticle-corner rc-tr"></div>
+      <div class="reticle-corner rc-bl"></div>
+      <div class="reticle-corner rc-br"></div>
+      <div class="reticle-center"></div>
+    </div>
+  </div>
+
+  <div class="side-panel left-panel">
+    <div class="panel-header">◈ POWER STATUS</div>
+    <div class="status-row">
+      <span class="sr-label">REPULSOR L</span>
+      <div class="sr-bar"><div class="sr-fill" id="rep-l" style="width:95%"></div></div>
+      <span class="sr-val" id="rep-l-val">95%</span>
+    </div>
+    <div class="status-row">
+      <span class="sr-label">REPULSOR R</span>
+      <div class="sr-bar"><div class="sr-fill" id="rep-r" style="width:92%"></div></div>
+      <span class="sr-val" id="rep-r-val">92%</span>
+    </div>
+    <div class="status-row">
+      <span class="sr-label">UNIBEAM</span>
+      <div class="sr-bar"><div class="sr-fill fill-cyan" style="width:100%"></div></div>
+      <span class="sr-val">100%</span>
+    </div>
+    <div class="status-row">
+      <span class="sr-label">SHIELDS</span>
+      <div class="sr-bar"><div class="sr-fill fill-orange" style="width:78%"></div></div>
+      <span class="sr-val">78%</span>
+    </div>
+    <div class="panel-divider"></div>
+    <div class="panel-header">◈ THREAT LEVEL</div>
+    <div class="threat-display">
+      <span class="threat-val" id="threat-val">MINIMAL</span>
+    </div>
+    <div class="coords-display">
+      <div class="coord-line">LAT: <span id="coord-lat">40.712800</span></div>
+      <div class="coord-line">LON: <span id="coord-lon">-74.006000</span></div>
+    </div>
+  </div>
+
+  <div class="side-panel right-panel">
+    <div class="panel-header">◈ SYSTEM LOG</div>
+    <div id="mini-console"></div>
+    <div class="panel-divider"></div>
+    <div class="panel-header">◈ CLOCK</div>
+    <div class="clock-display" id="clock-display">00:00:00</div>
+    <div class="date-display" id="date-display">--/--/----</div>
+  </div>
+</section>
+
+<!-- SYSTEM SECTION -->
+<section id="system" class="section">
+  <div class="section-title-wrap">
+    <h2 class="section-title">SYSTEM DIAGNOSTICS</h2>
+    <div class="section-underline"></div>
+  </div>
+  <div class="diagnostics-grid">
+    <div class="diag-card" data-glow="red">
+      <div class="diag-card-top"><div class="diag-icon">⬡</div><div class="diag-title">ARC REACTOR</div></div>
+      <div class="diag-ring-wrap">
+        <svg viewBox="0 0 100 100" class="diag-ring-svg">
+          <circle cx="50" cy="50" r="40" class="ring-bg"/>
+          <circle cx="50" cy="50" r="40" class="ring-progress rp-red" style="--pct:97"/>
+        </svg>
+        <div class="diag-ring-val">97%</div>
+      </div>
+      <div class="diag-desc">MARK L PALLADIUM CORE<br>OUTPUT: NOMINAL</div>
+    </div>
+    <div class="diag-card" data-glow="cyan">
+      <div class="diag-card-top"><div class="diag-icon">◈</div><div class="diag-title">NEURAL LINK</div></div>
+      <div class="diag-ring-wrap">
+        <svg viewBox="0 0 100 100" class="diag-ring-svg">
+          <circle cx="50" cy="50" r="40" class="ring-bg"/>
+          <circle cx="50" cy="50" r="40" class="ring-progress rp-cyan" style="--pct:100"/>
+        </svg>
+        <div class="diag-ring-val">100%</div>
+      </div>
+      <div class="diag-desc">LATENCY: 0.3ms<br>BANDWIDTH: 48 GBPS</div>
+    </div>
+    <div class="diag-card" data-glow="orange">
+      <div class="diag-card-top"><div class="diag-icon">▲</div><div class="diag-title">PROPULSION</div></div>
+      <div class="diag-ring-wrap">
+        <svg viewBox="0 0 100 100" class="diag-ring-svg">
+          <circle cx="50" cy="50" r="40" class="ring-bg"/>
+          <circle cx="50" cy="50" r="40" class="ring-progress rp-orange" style="--pct:88"/>
+        </svg>
+        <div class="diag-ring-val">88%</div>
+      </div>
+      <div class="diag-desc">THRUST: 2,400 LBF<br>FUEL CELL: STABLE</div>
+    </div>
+    <div class="diag-card" data-glow="red">
+      <div class="diag-card-top"><div class="diag-icon">◉</div><div class="diag-title">WEAPONS</div></div>
+      <div class="diag-ring-wrap">
+        <svg viewBox="0 0 100 100" class="diag-ring-svg">
+          <circle cx="50" cy="50" r="40" class="ring-bg"/>
+          <circle cx="50" cy="50" r="40" class="ring-progress rp-red" style="--pct:75"/>
+        </svg>
+        <div class="diag-ring-val">75%</div>
+      </div>
+      <div class="diag-desc">MICRO-MUNITIONS: ARMED<br>LASER: CHARGING</div>
+    </div>
+    <div class="diag-card" data-glow="cyan">
+      <div class="diag-card-top"><div class="diag-icon">⬣</div><div class="diag-title">ARMOR PLATING</div></div>
+      <div class="diag-ring-wrap">
+        <svg viewBox="0 0 100 100" class="diag-ring-svg">
+          <circle cx="50" cy="50" r="40" class="ring-bg"/>
+          <circle cx="50" cy="50" r="40" class="ring-progress rp-cyan" style="--pct:99"/>
+        </svg>
+        <div class="diag-ring-val">99%</div>
+      </div>
+      <div class="diag-desc">NANO-MESH: INTACT<br>IMPACT RATING: MAX</div>
+    </div>
+    <div class="diag-card" data-glow="orange">
+      <div class="diag-card-top"><div class="diag-icon">◎</div><div class="diag-title">SENSORS</div></div>
+      <div class="diag-ring-wrap">
+        <svg viewBox="0 0 100 100" class="diag-ring-svg">
+          <circle cx="50" cy="50" r="40" class="ring-bg"/>
+          <circle cx="50" cy="50" r="40" class="ring-progress rp-orange" style="--pct:100"/>
+        </svg>
+        <div class="diag-ring-val">100%</div>
+      </div>
+      <div class="diag-desc">RADAR: ACTIVE<br>THERMAL: ONLINE</div>
+    </div>
+  </div>
+</section>
+
+<!-- INTERFACE SECTION -->
+<section id="interface" class="section">
+  <div class="section-title-wrap">
+    <h2 class="section-title">JARVIS CONSOLE</h2>
+    <div class="section-underline"></div>
+  </div>
+  <div class="console-layout">
+    <div class="console-terminal">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <span class="td td-red"></span><span class="td td-orange"></span><span class="td td-cyan"></span>
+        </div>
+        <div class="terminal-title">JARVIS // COMMAND INTERFACE v7.3</div>
+        <div class="terminal-status">● LIVE</div>
+      </div>
+      <div class="terminal-body" id="terminal-body"></div>
+      <div class="terminal-input-wrap">
+        <span class="term-prompt">JARVIS&gt;</span>
+        <input type="text" id="term-input" class="term-input" placeholder="ENTER COMMAND... (try: help, status, scan)" autocomplete="off" spellcheck="false" />
+      </div>
+    </div>
+    <div class="console-sidebar">
+      <div class="cs-panel radar-panel">
+        <div class="cs-panel-title">◈ RADAR SWEEP</div>
+        <div class="radar-wrap">
+          <canvas id="radar-canvas" width="200" height="200"></canvas>
+        </div>
+      </div>
+      <div class="cs-panel alerts-panel">
+        <div class="cs-panel-title">◈ LIVE ALERTS</div>
+        <div id="alerts-feed"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT SECTION -->
+<section id="about" class="section">
+  <div class="section-title-wrap">
+    <h2 class="section-title">ABOUT THIS UNIT</h2>
+    <div class="section-underline"></div>
+  </div>
+  <div class="about-layout">
+    <div class="about-armor-display">
+      <div class="armor-silhouette">
+        <div class="armor-glow-body"></div>
+        <div class="armor-chest-reactor"></div>
+        <div class="armor-eye-l"></div>
+        <div class="armor-eye-r"></div>
+        <div class="armor-hand-l"></div>
+        <div class="armor-hand-r"></div>
+        <div class="armor-jet-l"></div>
+        <div class="armor-jet-r"></div>
+      </div>
+    </div>
+    <div class="about-specs">
+      <div class="spec-block"><div class="spec-label">DESIGNATION</div><div class="spec-value">MARK L (50)</div></div>
+      <div class="spec-block"><div class="spec-label">CLASSIFICATION</div><div class="spec-value">NANO-TECH ARMOR</div></div>
+      <div class="spec-block"><div class="spec-label">POWER SOURCE</div><div class="spec-value">ARC REACTOR III</div></div>
+      <div class="spec-block"><div class="spec-label">MAX ALTITUDE</div><div class="spec-value">42,000 FT</div></div>
+      <div class="spec-block"><div class="spec-label">MAX VELOCITY</div><div class="spec-value">MACH 2.3</div></div>
+      <div class="spec-block"><div class="spec-label">OPERATOR</div><div class="spec-value">STARK, ANTHONY E.</div></div>
+      <div class="spec-block"><div class="spec-label">AI SYSTEM</div><div class="spec-value">JARVIS v7.3.1</div></div>
+      <div class="spec-block"><div class="spec-label">STATUS</div><div class="spec-value green-val">● OPERATIONAL</div></div>
+    </div>
+  </div>
+</section>
+
+<script src="/static/js/script.js"></script>
+</body>
+</html>

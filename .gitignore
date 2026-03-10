@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+.Python
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Flask
+instance/
+.webassets-cache
+flask_session/
+
+# Environment variables / secrets
+.env
+.env.local
+*.env
+config.py
+
+# API Keys (NEVER commit these)
+secrets.py
+api_keys.py
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# EC2 / SSH keys (CRITICAL - never commit)
+*.pem
+*.key
+*.ppk
+
+# Compiled assets
+*.min.js.map
