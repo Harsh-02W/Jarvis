@@ -1,23 +1,19 @@
 """
 JARVIS Interface — Flask Backend
-Groq LLM integration for real AI responses
+Real data: IP geolocation, weather, system info + Groq AI
 """
 from flask import Flask, render_template, jsonify, request
 from dotenv import load_dotenv
-import random, datetime, math, os
+import random, datetime, math, os, urllib.request, json, platform, psutil
 
 load_dotenv()
-
 from groq import Groq
 
 app = Flask(__name__)
-
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-
 conversation_history = []
 
 JARVIS_SYSTEM_PROMPT = """You are JARVIS (Just A Rather Very Intelligent System), Tony Stark's highly advanced AI assistant.
-
 Your personality:
 - Speak in a precise, calm, slightly formal British-influenced tone
 - Be highly intelligent, analytical and efficient
@@ -27,7 +23,6 @@ Your personality:
 - Use technical language naturally
 - Sometimes reference suit systems, arc reactor, or Stark Industries naturally
 - Never break character
-
 Examples of your style:
 - "Certainly, Sir. Shall I proceed with the analysis?"
 - "I've completed the scan. Results are... concerning."
@@ -45,19 +40,6 @@ BOOT_SEQUENCE = [
     "ALL SYSTEMS NOMINAL. READY FOR DEPLOYMENT.",
 ]
 
-SYSTEM_ALERTS = [
-    "ENERGY SIGNATURE DETECTED — SECTOR 7G",
-    "SUIT INTEGRITY: 98.7%",
-    "REPULSOR CHARGE: OPTIMAL",
-    "TARGETING SYSTEM LOCKED",
-    "ALTITUDE CEILING: UNLIMITED",
-    "COMM FREQUENCY ENCRYPTED",
-    "STEALTH MODE: AVAILABLE",
-    "HEAT SIGNATURE MASKED",
-    "PROXIMITY ALERT CLEARED",
-    "POWER CELL RECHARGING...",
-]
-
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -68,27 +50,155 @@ def boot_sequence():
 
 @app.route("/api/system-status")
 def system_status():
-    return jsonify({
-        "arc_reactor": round(random.uniform(97.2, 100.0), 1),
-        "suit_integrity": round(random.uniform(94.0, 99.9), 1),
-        "repulsor_left": round(random.uniform(88.0, 100.0), 1),
-        "repulsor_right": round(random.uniform(88.0, 100.0), 1),
-        "altitude": random.randint(0, 42000),
-        "speed": random.randint(0, 1842),
-        "threat_level": random.choice(["MINIMAL", "MINIMAL", "MINIMAL", "ELEVATED", "LOW"]),
-        "timestamp": datetime.datetime.now().isoformat(),
-    })
+    """Real system metrics using psutil"""
+    try:
+        cpu = psutil.cpu_percent(interval=0.3)
+        mem = psutil.virtual_memory()
+        disk = psutil.disk_usage('/')
+        battery = psutil.sensors_battery()
+        net = psutil.net_io_counters()
+
+        battery_pct = round(battery.percent, 1) if battery else 100.0
+        battery_charging = battery.power_plugged if battery else True
+
+        return jsonify({
+            "arc_reactor": battery_pct,
+            "suit_integrity": round(100 - cpu, 1),
+            "repulsor_left": round(100 - mem.percent, 1),
+            "repulsor_right": round(100 - disk.percent, 1),
+            "cpu": cpu,
+            "memory_used": round(mem.used / (1024**3), 2),
+            "memory_total": round(mem.total / (1024**3), 2),
+            "memory_percent": mem.percent,
+            "disk_used": round(disk.used / (1024**3), 1),
+            "disk_total": round(disk.total / (1024**3), 1),
+            "disk_percent": disk.percent,
+            "battery": battery_pct,
+            "charging": battery_charging,
+            "net_sent": round(net.bytes_sent / (1024**2), 1),
+            "net_recv": round(net.bytes_recv / (1024**2), 1),
+            "altitude": 0,
+            "speed": 0,
+            "threat_level": "ELEVATED" if cpu > 80 else "MINIMAL",
+            "os": platform.system() + " " + platform.release(),
+            "hostname": platform.node(),
+            "timestamp": datetime.datetime.now().isoformat(),
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/location")
+def get_location():
+    """Real IP-based geolocation using free ip-api.com"""
+    try:
+        with urllib.request.urlopen("http://ip-api.com/json/", timeout=5) as resp:
+            data = json.loads(resp.read().decode())
+        return jsonify({
+            "lat": data.get("lat", 0),
+            "lon": data.get("lon", 0),
+            "city": data.get("city", "UNKNOWN"),
+            "country": data.get("country", "UNKNOWN"),
+            "isp": data.get("isp", "UNKNOWN"),
+            "ip": data.get("query", "UNKNOWN"),
+            "timezone": data.get("timezone", "UNKNOWN"),
+            "status": "TRACKING"
+        })
+    except Exception as e:
+        return jsonify({"lat": 0, "lon": 0, "city": "OFFLINE", "country": "N/A", "ip": "N/A", "status": "ERROR"})
+
+@app.route("/api/weather")
+def get_weather():
+    """Real weather using open-meteo.com (completely free, no key needed)"""
+    try:
+        # First get location
+        with urllib.request.urlopen("http://ip-api.com/json/", timeout=5) as resp:
+            loc = json.loads(resp.read().decode())
+        lat = loc.get("lat", 40.7128)
+        lon = loc.get("lon", -74.0060)
+        city = loc.get("city", "Unknown")
+
+        # Then get weather
+        url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&wind_speed_unit=mph&temperature_unit=celsius"
+        with urllib.request.urlopen(url, timeout=5) as resp:
+            weather = json.loads(resp.read().decode())
+
+        current = weather.get("current", {})
+        temp = current.get("temperature_2m", 0)
+        humidity = current.get("relative_humidity_2m", 0)
+        wind = current.get("wind_speed_10m", 0)
+        code = current.get("weather_code", 0)
+
+        # Weather code to condition
+        if code == 0: condition = "CLEAR"
+        elif code in [1,2,3]: condition = "PARTLY CLOUDY"
+        elif code in [45,48]: condition = "FOGGY"
+        elif code in [51,53,55,61,63,65]: condition = "RAIN"
+        elif code in [71,73,75]: condition = "SNOW"
+        elif code in [80,81,82]: condition = "SHOWERS"
+        elif code in [95,96,99]: condition = "THUNDERSTORM"
+        else: condition = "UNKNOWN"
+
+        return jsonify({
+            "temp": round(temp, 1),
+            "humidity": humidity,
+            "wind": round(wind, 1),
+            "condition": condition,
+            "city": city,
+            "status": "LIVE"
+        })
+    except Exception as e:
+        return jsonify({"temp": "N/A", "humidity": "N/A", "wind": "N/A", "condition": "OFFLINE", "city": "N/A", "status": "ERROR"})
 
 @app.route("/api/alert")
 def get_alert():
-    return jsonify({"message": random.choice(SYSTEM_ALERTS), "level": random.choice(["INFO", "INFO", "WARN", "CRITICAL"]), "timestamp": datetime.datetime.now().isoformat()})
+    """Generate alerts based on real system data"""
+    try:
+        cpu = psutil.cpu_percent(interval=0.1)
+        mem = psutil.virtual_memory()
+        disk = psutil.disk_usage('/')
+        battery = psutil.sensors_battery()
+
+        alerts = []
+        if cpu > 80:
+            alerts.append(("CPU OVERLOAD: {}%".format(round(cpu,1)), "CRITICAL"))
+        if mem.percent > 85:
+            alerts.append(("MEMORY CRITICAL: {}% USED".format(round(mem.percent,1)), "CRITICAL"))
+        if disk.percent > 90:
+            alerts.append(("DISK SPACE LOW: {}% USED".format(round(disk.percent,1)), "WARN"))
+        if battery and battery.percent < 20 and not battery.power_plugged:
+            alerts.append(("BATTERY LOW: {}%".format(round(battery.percent,1)), "CRITICAL"))
+        if battery and battery.power_plugged:
+            alerts.append(("POWER SUPPLY: CONNECTED", "INFO"))
+
+        # Fallback
+        if not alerts:
+            fallbacks = [
+                ("ALL SYSTEMS NOMINAL", "INFO"),
+                ("CPU: {}% | RAM: {}%".format(round(cpu,1), round(mem.percent,1)), "INFO"),
+                ("NETWORK: ONLINE", "INFO"),
+                ("DISK USAGE: {}%".format(round(disk.percent,1)), "INFO"),
+            ]
+            alerts.append(random.choice(fallbacks))
+
+        msg, level = random.choice(alerts)
+        return jsonify({"message": msg, "level": level, "timestamp": datetime.datetime.now().isoformat()})
+    except Exception as e:
+        return jsonify({"message": "SYSTEM SCAN COMPLETE", "level": "INFO", "timestamp": datetime.datetime.now().isoformat()})
 
 @app.route("/api/coordinates")
 def get_coordinates():
-    t = datetime.datetime.now().timestamp()
-    lat = 40.7128 + math.sin(t * 0.001) * 0.05
-    lon = -74.0060 + math.cos(t * 0.001) * 0.05
-    return jsonify({"lat": round(lat, 6), "lon": round(lon, 6), "location": "NEW YORK CITY — STARK TOWER", "status": "TRACKING"})
+    """Real coordinates from IP"""
+    try:
+        with urllib.request.urlopen("http://ip-api.com/json/", timeout=5) as resp:
+            data = json.loads(resp.read().decode())
+        return jsonify({
+            "lat": data.get("lat", 0),
+            "lon": data.get("lon", 0),
+            "location": "{}, {}".format(data.get("city","?"), data.get("country","?")),
+            "status": "TRACKING"
+        })
+    except:
+        return jsonify({"lat": 0, "lon": 0, "location": "OFFLINE", "status": "ERROR"})
 
 @app.route("/api/jarvis-chat", methods=["POST"])
 def jarvis_chat():
@@ -99,7 +209,6 @@ def jarvis_chat():
             return jsonify({"error": "No message provided"}), 400
 
         conversation_history.append({"role": "user", "content": user_message})
-
         if len(conversation_history) > 20:
             conversation_history = conversation_history[-20:]
 
@@ -116,7 +225,6 @@ def jarvis_chat():
         conversation_history.append({"role": "assistant", "content": reply})
 
         return jsonify({"reply": reply, "timestamp": datetime.datetime.now().isoformat(), "model": "llama-3.3-70b-versatile"})
-
     except Exception as e:
         return jsonify({"reply": f"SYSTEM ERROR: {str(e)}", "error": True}), 500
 
