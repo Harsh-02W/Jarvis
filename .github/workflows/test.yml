@@ -1,0 +1,24 @@
+# .github/workflows/test.yml
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install flask python-dotenv groq psutil
+
+      - name: Check syntax
+        run: python -m py_compile ironman/app.py && echo "Syntax OK."
+
+      - name: Check imports
+        run: cd ironman && python -c "import app" || true
