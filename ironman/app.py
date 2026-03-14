@@ -55,11 +55,16 @@ def system_status():
         cpu = psutil.cpu_percent(interval=0.3)
         mem = psutil.virtual_memory()
         disk = psutil.disk_usage('/')
-        battery = psutil.sensors_battery()
         net = psutil.net_io_counters()
 
-        battery_pct = round(battery.percent, 1) if battery else 100.0
-        battery_charging = battery.power_plugged if battery else True
+        # Battery may not be available in Docker/VMs
+        try:
+            battery = psutil.sensors_battery()
+            battery_pct = round(battery.percent, 1) if battery else 99.9
+            battery_charging = battery.power_plugged if battery else True
+        except Exception:
+            battery_pct = 99.9
+            battery_charging = True
 
         return jsonify({
             "arc_reactor": battery_pct,
