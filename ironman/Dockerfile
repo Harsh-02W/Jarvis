@@ -24,8 +24,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy project files
 COPY app.py .
-COPY templates/ templates/
-COPY static/ static/
+COPY ironman/templates/ templates/
+COPY ironman/static/ static/
 
 # Expose port
 EXPOSE 5001

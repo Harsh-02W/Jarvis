@@ -1,6 +1,8 @@
 name: Build and Push to Docker Hub
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -29,3 +31,6 @@ jobs:
           tags: |
             ${{ vars.DOCKERHUB_USERNAME }}/jarvis-ai:latest
             ${{ vars.DOCKERHUB_USERNAME }}/jarvis-ai:${{ github.sha }}
+
+      - name: Print image URL
+        run: echo "Image pushed to https://hub.docker.com/r/${{ vars.DOCKERHUB_USERNAME }}/jarvis-ai"
