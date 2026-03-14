@@ -1,8 +1,3 @@
-# ═══════════════════════════════════════════════
-#  JARVIS Interface — Dockerfile
-#  Python 3.12 slim base
-# ═══════════════════════════════════════════════
-
 FROM python:3.12-slim
 
 WORKDIR /app
@@ -15,14 +10,10 @@ RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy and install dependencies
-COPY requirements.txt .
+COPY ironman/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy app
-COPY app.py .
-
-# Copy templates and static from ironman/ subfolder
+COPY ironman/app.py .
 COPY ironman/templates/ templates/
 COPY ironman/static/ static/
 
